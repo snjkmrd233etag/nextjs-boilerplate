@@ -1,24 +1,90 @@
+"use client";
+
+import { useState } from "react";
+
 const navigationItems = [
-  "Dashboard",
-  "AI Assistant",
-  "Tasks",
-  "Wellness",
-  "Resources",
-  "Community",
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    eyebrow: "Overview",
+    description: "A live snapshot of focus, tasks, and support tools.",
+  },
+  {
+    id: "assistant",
+    label: "AI Assistant",
+    eyebrow: "Copilot",
+    description: "Draft replies, summarize the day, and plan the next move.",
+  },
+  {
+    id: "tasks",
+    label: "Tasks",
+    eyebrow: "Execution",
+    description: "Stay on the highest-value work and clear the queue faster.",
+  },
+  {
+    id: "wellness",
+    label: "Wellness",
+    eyebrow: "Reset",
+    description: "Use breathing, recovery, and check-ins to reduce overload.",
+  },
+  {
+    id: "resources",
+    label: "Resources",
+    eyebrow: "Context",
+    description: "Surface notes, workflows, and saved material instantly.",
+  },
+  {
+    id: "community",
+    label: "Community",
+    eyebrow: "Network",
+    description: "Track meetups, discussions, and local activity at a glance.",
+  },
 ];
 
 const tasks = [
-  { title: "Finish investor update draft", progress: "84%", ring: "from-cyan-300 to-cyan-500" },
-  { title: "Review sprint priorities", progress: "61%", ring: "from-sky-200 to-cyan-300" },
-  { title: "Prep Mysuru meetup notes", progress: "42%", ring: "from-cyan-200 to-teal-300" },
-  { title: "Clear inbox triage", progress: "28%", ring: "from-slate-200 to-cyan-200" },
+  {
+    title: "Finish investor update draft",
+    progress: "84%",
+    ring: "from-cyan-300 to-cyan-500",
+    phase: "Needs final review",
+  },
+  {
+    title: "Review sprint priorities",
+    progress: "61%",
+    ring: "from-sky-200 to-cyan-300",
+    phase: "Team alignment",
+  },
+  {
+    title: "Prep Mysuru meetup notes",
+    progress: "42%",
+    ring: "from-cyan-200 to-teal-300",
+    phase: "Research in progress",
+  },
+  {
+    title: "Clear inbox triage",
+    progress: "28%",
+    ring: "from-slate-200 to-cyan-200",
+    phase: "Low-energy task",
+  },
 ];
 
 const suggestions = [
-  "Summarize my day",
-  "Plan a calm evening",
-  "Draft a client reply",
-  "Generate focus playlist",
+  {
+    label: "Summarize my day",
+    response: "I prepared a concise evening recap with wins, blockers, and one follow-up.",
+  },
+  {
+    label: "Plan a calm evening",
+    response: "I built a lighter schedule with a reset window, dinner, and one focused block.",
+  },
+  {
+    label: "Draft a client reply",
+    response: "I framed a warm, professional response and pulled the main action items forward.",
+  },
+  {
+    label: "Generate focus playlist",
+    response: "I queued an instrumental set for a 45-minute deep-work session.",
+  },
 ];
 
 const moodScale = [
@@ -32,7 +98,7 @@ function SidebarIcon({ active = false }: { active?: boolean }) {
     <span
       aria-hidden
       className={[
-        "grid size-10 place-items-center rounded-2xl border text-sm font-semibold transition-colors",
+        "grid size-10 place-items-center rounded-2xl border text-sm font-semibold transition-all duration-300",
         active
           ? "border-cyan-200/60 bg-cyan-300/18 text-cyan-100 shadow-[0_0_24px_rgba(0,240,255,0.2)]"
           : "border-white/10 bg-white/6 text-slate-300",
@@ -65,16 +131,60 @@ function ProgressRing({
 }
 
 export default function Home() {
+  const [activeNav, setActiveNav] = useState(navigationItems[0]);
+  const [activeTask, setActiveTask] = useState(tasks[0]);
+  const [searchValue, setSearchValue] = useState("");
+  const [experienceMessage, setExperienceMessage] = useState(
+    "Your workspace is ready. Pick a prompt, open a section, or launch a reset."
+  );
+  const [isBreathing, setIsBreathing] = useState(false);
+  const [notificationsOn, setNotificationsOn] = useState(true);
+
+  const handleSearchAction = () => {
+    const query = searchValue.trim();
+
+    setExperienceMessage(
+      query
+        ? `Running "${query}" across commands, saved context, and current workflows.`
+        : "Type a command or prompt first, then I can search the workspace experience."
+    );
+  };
+
+  const handleBreathingToggle = () => {
+    setIsBreathing((current) => {
+      const next = !current;
+      setExperienceMessage(
+        next
+          ? "Breathing exercise started. Inhale for 4, hold for 4, exhale for 6."
+          : "Breathing exercise paused. Your regular workspace is active again."
+      );
+      return next;
+    });
+  };
+
+  const handleNotificationToggle = () => {
+    setNotificationsOn((current) => {
+      const next = !current;
+      setExperienceMessage(
+        next
+          ? "Gentle notifications are back on for important updates and reminders."
+          : "Notifications are muted. The dashboard will stay quiet until you re-enable them."
+      );
+      return next;
+    });
+  };
+
   return (
     <main className="snow-shell min-h-screen overflow-hidden bg-[#081120] text-slate-100">
       <div className="pointer-events-none absolute inset-0">
         <div className="snow-aura snow-aura-top" />
         <div className="snow-aura snow-aura-bottom" />
         <div className="snow-particles" />
+        <div className="aurora-grid" />
       </div>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] gap-6 px-4 py-4 sm:px-6 lg:px-8">
-        <aside className="glass-panel hidden w-[270px] shrink-0 flex-col justify-between rounded-[32px] p-5 lg:flex">
+        <aside className="glass-panel hidden w-[290px] shrink-0 flex-col justify-between rounded-[32px] p-5 lg:flex">
           <div className="space-y-8">
             <div className="rounded-[28px] border border-white/14 bg-white/8 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]">
               <p className="text-xs uppercase tracking-[0.45em] text-cyan-100/72">
@@ -83,26 +193,43 @@ export default function Home() {
               <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">
                 Winter AI Hub
               </h1>
+              <p className="mt-3 text-sm leading-6 text-slate-200/74">
+                A calmer control room with visible actions instead of decorative controls.
+              </p>
             </div>
 
             <nav className="space-y-2">
-              {navigationItems.map((item, index) => (
-                <a
-                  key={item}
-                  href="#"
-                  className={[
-                    "group flex items-center gap-3 rounded-[24px] border px-3 py-3 transition-all",
-                    index === 0
-                      ? "border-cyan-200/30 bg-cyan-300/12 shadow-[0_8px_30px_rgba(0,240,255,0.12)]"
-                      : "border-white/8 bg-white/4 hover:border-cyan-200/20 hover:bg-white/8",
-                  ].join(" ")}
-                >
-                  <SidebarIcon active={index === 0} />
-                  <span className="text-sm font-medium text-slate-100/92">
-                    {item}
-                  </span>
-                </a>
-              ))}
+              {navigationItems.map((item) => {
+                const isActive = item.id === activeNav.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveNav(item);
+                      setExperienceMessage(item.description);
+                    }}
+                    className={[
+                      "interactive-surface group flex w-full items-center gap-3 rounded-[24px] border px-3 py-3 text-left transition-all duration-300",
+                      isActive
+                        ? "border-cyan-200/30 bg-cyan-300/12 shadow-[0_8px_30px_rgba(0,240,255,0.12)]"
+                        : "border-white/8 bg-white/4 hover:border-cyan-200/20 hover:bg-white/8",
+                    ].join(" ")}
+                    aria-pressed={isActive}
+                  >
+                    <SidebarIcon active={isActive} />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-slate-100/92">
+                        {item.label}
+                      </span>
+                      <span className="mt-1 block text-[11px] uppercase tracking-[0.28em] text-slate-300/52">
+                        {item.eyebrow}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </nav>
           </div>
 
@@ -111,9 +238,14 @@ export default function Home() {
               Snow Mode
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-200/82">
-              Ambient assistant mode is tuned for a calm evening workflow with
-              gentle prompts and low-noise alerts.
+              Ambient assistant mode is tuned for a calm evening workflow with gentle prompts and low-noise alerts.
             </p>
+            <div className="mt-4 flex items-center gap-3">
+              <span className="soft-glow size-2.5 rounded-full bg-emerald-300" />
+              <span className="text-sm text-slate-200/72">
+                {notificationsOn ? "Calm alerts active" : "Quiet mode active"}
+              </span>
+            </div>
           </div>
         </aside>
 
@@ -128,9 +260,7 @@ export default function Home() {
                   <p className="text-[11px] uppercase tracking-[0.42em] text-cyan-100/70">
                     Gamma Snowy
                   </p>
-                  <p className="text-sm text-slate-300/80">
-                    Good evening, Sanjay
-                  </p>
+                  <p className="text-sm text-slate-300/80">Good evening, Sanjay</p>
                 </div>
               </div>
 
@@ -139,14 +269,25 @@ export default function Home() {
                   <div className="absolute left-4 top-1/2 size-2.5 -translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_16px_rgba(0,240,255,0.75)]" />
                   <input
                     aria-label="Search"
-                    defaultValue="Search commands, memories, and workflows"
+                    value={searchValue}
+                    onChange={(event) => setSearchValue(event.target.value)}
+                    placeholder="Search commands, memories, and workflows"
                     className="w-full rounded-[22px] border border-white/12 bg-white/8 py-4 pr-4 pl-10 text-sm text-slate-100 outline-none placeholder:text-slate-300/55"
                   />
                 </div>
                 <button
                   type="button"
+                  onClick={handleSearchAction}
+                  className="interactive-surface rounded-[22px] border border-cyan-200/28 bg-cyan-300/14 px-4 py-3 text-sm font-medium text-cyan-50"
+                >
+                  Search
+                </button>
+                <button
+                  type="button"
                   aria-label="Notifications"
-                  className="grid size-12 place-items-center rounded-2xl border border-white/12 bg-white/8 text-cyan-100 shadow-[0_0_24px_rgba(165,243,252,0.1)]"
+                  aria-pressed={notificationsOn}
+                  onClick={handleNotificationToggle}
+                  className="interactive-surface grid size-12 place-items-center rounded-2xl border border-white/12 bg-white/8 text-cyan-100 shadow-[0_0_24px_rgba(165,243,252,0.1)]"
                 >
                   <span className="snow-bell" />
                 </button>
@@ -169,29 +310,30 @@ export default function Home() {
                       <span className="grid size-7 place-items-center rounded-full border border-cyan-200/35 bg-cyan-200/14">
                         <span className="block size-2 rounded-full bg-cyan-200 shadow-[0_0_18px_rgba(0,240,255,0.85)]" />
                       </span>
-                      Personal AI Console
+                      {activeNav.label}
                     </div>
                     <h2 className="max-w-2xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-                      How can I help you today, Sanjay?
+                      Make the dashboard feel alive, not static.
                     </h2>
                     <p className="mt-4 max-w-xl text-base leading-7 text-slate-200/72">
-                      Your evening workspace is tuned for focus, recovery, and
-                      low-friction assistance across tasks, wellness, and local
-                      context.
+                      {activeNav.description}
                     </p>
                   </div>
 
                   <div className="flex w-full max-w-md flex-col gap-3">
                     <div className="rounded-[28px] border border-white/14 bg-[#d6f9ff]/7 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm text-slate-200/82">
-                          Voice capture ready
-                        </p>
+                        <p className="text-sm text-slate-200/82">Experience feed</p>
                         <span className="rounded-full border border-cyan-200/30 bg-cyan-300/12 px-3 py-1 text-xs uppercase tracking-[0.28em] text-cyan-100/82">
-                          Live
+                          {isBreathing ? "Reset" : "Live"}
                         </span>
                       </div>
-                      <div className="mt-4 h-14 rounded-[20px] border border-white/12 bg-white/10" />
+                      <p
+                        aria-live="polite"
+                        className="mt-4 rounded-[20px] border border-white/12 bg-white/10 px-4 py-4 text-sm leading-6 text-slate-100/88"
+                      >
+                        {experienceMessage}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -214,25 +356,37 @@ export default function Home() {
                   </div>
 
                   <div className="mt-6 space-y-4">
-                    {tasks.map((task) => (
-                      <div
-                        key={task.title}
-                        className="flex items-center gap-4 rounded-[24px] border border-white/10 bg-white/6 p-4"
-                      >
-                        <ProgressRing progress={task.progress} ring={task.ring} />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-slate-100">
-                            {task.title}
-                          </p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.25em] text-slate-300/58">
-                            Snowflake checkpoint
-                          </p>
-                        </div>
-                        <span className="rounded-full border border-cyan-200/24 bg-cyan-300/10 px-2.5 py-1 text-xs text-cyan-50">
-                          Focus
-                        </span>
-                      </div>
-                    ))}
+                    {tasks.map((task) => {
+                      const isActive = task.title === activeTask.title;
+
+                      return (
+                        <button
+                          key={task.title}
+                          type="button"
+                          onClick={() => {
+                            setActiveTask(task);
+                            setExperienceMessage(`${task.title} selected. ${task.phase}.`);
+                          }}
+                          className={[
+                            "interactive-surface flex w-full items-center gap-4 rounded-[24px] border p-4 text-left transition-all duration-300",
+                            isActive
+                              ? "border-cyan-200/26 bg-cyan-300/10 shadow-[0_12px_35px_rgba(0,240,255,0.08)]"
+                              : "border-white/10 bg-white/6",
+                          ].join(" ")}
+                        >
+                          <ProgressRing progress={task.progress} ring={task.ring} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-slate-100">{task.title}</p>
+                            <p className="mt-1 text-xs uppercase tracking-[0.25em] text-slate-300/58">
+                              {task.phase}
+                            </p>
+                          </div>
+                          <span className="rounded-full border border-cyan-200/24 bg-cyan-300/10 px-2.5 py-1 text-xs text-cyan-50">
+                            Open
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </section>
 
@@ -258,7 +412,7 @@ export default function Home() {
                         </div>
                         <div className="h-3 rounded-full bg-white/8 p-[2px]">
                           <div
-                            className={`${item.tone} h-full rounded-full`}
+                            className={`${item.tone} h-full rounded-full transition-[width] duration-500`}
                             style={{ width: item.width }}
                           />
                         </div>
@@ -268,9 +422,10 @@ export default function Home() {
 
                   <button
                     type="button"
-                    className="mt-8 w-full rounded-[22px] border border-cyan-200/34 bg-gradient-to-r from-cyan-300/20 to-sky-200/14 px-4 py-4 text-sm font-medium text-cyan-50 shadow-[0_0_28px_rgba(0,240,255,0.14)]"
+                    onClick={handleBreathingToggle}
+                    className="interactive-surface mt-8 w-full rounded-[22px] border border-cyan-200/34 bg-gradient-to-r from-cyan-300/20 to-sky-200/14 px-4 py-4 text-sm font-medium text-cyan-50 shadow-[0_0_28px_rgba(0,240,255,0.14)]"
                   >
-                    Start Breathing Exercise
+                    {isBreathing ? "Pause Breathing Exercise" : "Start Breathing Exercise"}
                   </button>
                 </section>
               </div>
@@ -311,8 +466,7 @@ export default function Home() {
                 </div>
 
                 <p className="mt-5 text-sm leading-7 text-slate-200/72">
-                  Tip: Keep the next deep-work block near a bright window and
-                  start with a two-minute reset before switching contexts.
+                  Tip: Keep the next deep-work block near a bright window and start with a two-minute reset before switching contexts.
                 </p>
               </section>
 
@@ -354,11 +508,12 @@ export default function Home() {
                 <div className="mt-6 flex flex-wrap gap-3">
                   {suggestions.map((suggestion) => (
                     <button
-                      key={suggestion}
+                      key={suggestion.label}
                       type="button"
-                      className="rounded-full border border-cyan-200/24 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-50/92 transition-colors hover:bg-cyan-300/16"
+                      onClick={() => setExperienceMessage(suggestion.response)}
+                      className="interactive-surface rounded-full border border-cyan-200/24 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-50/92 transition-colors hover:bg-cyan-300/16"
                     >
-                      {suggestion}
+                      {suggestion.label}
                     </button>
                   ))}
                 </div>
@@ -370,7 +525,12 @@ export default function Home() {
 
       <button
         type="button"
-        className="fixed right-4 bottom-4 z-20 rounded-full border border-cyan-200/36 bg-gradient-to-r from-cyan-300/36 to-sky-200/22 px-6 py-4 text-sm font-medium text-cyan-50 shadow-[0_18px_60px_rgba(0,240,255,0.25)] backdrop-blur-xl sm:right-8 sm:bottom-8"
+        onClick={() =>
+          setExperienceMessage(
+            `AI workspace opened for ${activeTask.title.toLowerCase()}. Starting with ${activeNav.label.toLowerCase()} context.`
+          )
+        }
+        className="interactive-surface fixed right-4 bottom-4 z-20 rounded-full border border-cyan-200/36 bg-gradient-to-r from-cyan-300/36 to-sky-200/22 px-6 py-4 text-sm font-medium text-cyan-50 shadow-[0_18px_60px_rgba(0,240,255,0.25)] backdrop-blur-xl sm:right-8 sm:bottom-8"
       >
         Ask AI Anything
       </button>

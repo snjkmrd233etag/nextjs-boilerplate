@@ -30,13 +30,18 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
 a {
   color: inherit;
   text-decoration: none;
-}
-
-input {
-  font: inherit;
 }
 
 .snow-shell {
@@ -100,6 +105,52 @@ input {
   animation: drift 28s linear infinite;
 }
 
+.aurora-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image:
+    linear-gradient(rgba(165, 243, 252, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(165, 243, 252, 0.12) 1px, transparent 1px);
+  background-size: 110px 110px;
+  mask-image: radial-gradient(circle at center, black 42%, transparent 88%);
+}
+
+.interactive-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.interactive-surface::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 48%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.interactive-surface:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 45px rgba(3, 12, 31, 0.28);
+}
+
+.interactive-surface:hover::before,
+.interactive-surface:focus-visible::before {
+  opacity: 1;
+}
+
+.interactive-surface:focus-visible {
+  outline: 2px solid rgba(165, 243, 252, 0.8);
+  outline-offset: 2px;
+}
+
+.soft-glow {
+  box-shadow: 0 0 18px rgba(110, 231, 183, 0.8);
+}
+
 .snow-bell {
   display: block;
   position: relative;
@@ -158,6 +209,33 @@ input {
 
   to {
     transform: translateY(120px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .interactive-surface {
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .soft-glow {
+    animation: pulseGlow 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
   }
 }
 
